@@ -3,6 +3,7 @@
 '''
 from os.path import exists
 from PIL import Image
+from hashlib import md5
 
 
 END_OF_MESSAGE = "THAT'S ALL FOLKS!"
@@ -97,7 +98,6 @@ def encode_string(input_file):
     print(f"Total number of pixels: {pixel_count}")
     writeable_bytes = pixel_count * 3
     print(f"Maximum message size: {writeable_bytes}")
-    # TODO: calculate maximum message length based on image
     input_string = ""
     while len(input_string) < 1:
         input_string = input("Enter message to hide in image: ")
@@ -116,23 +116,32 @@ def encode_string(input_file):
             format="JPEG",
             quality=95,
             subsampling=0)
+    print(f"\nOriginal File: {input_file}, MD5 Hash: {hash_file(input_file)}")
+    print(f"Modified File: {new_filename}, MD5 Hash: {hash_file(new_filename)}")
+
+
+def hash_file(input_file):
+    '''Take input file and return hashed hex string'''
+    with open(input_file, 'rb') as in_f:
+        hash_hex = md5(in_f.read()).hexdigest()
+        return hash_hex
 
 
 def main():
     '''Main Function'''
-    option_1 = input("Select option (encode or decode): ").lower()
-    while option_1 != "encode" and option_1 != "decode":
+    option_1 = input("Select option (embed or extract): ").lower()
+    while option_1 != "embed" and option_1 != "extract":
         print(f"Invalid Selection: {option_1}")
-        option_1 = input("Select option (encode or decode): ").lower()
+        option_1 = input("Select option (embed or extract): ").lower()
 
     input_file = input(f"Select file to {option_1}: ")
     while not exists(input_file) or "jpg" not in input_file.lower():
         print(f"The file, {input_file} does not exist, or is not a JPEG.")
         input_file = input(f"Select file to {option_1}: ")
 
-    if option_1 == "encode":
+    if option_1 == "embed":
         encode_string(input_file)
-    elif option_1 == "decode":
+    elif option_1 == "extract":
         decode_string(input_file)
 
     print("\nAll done! Good job!")
